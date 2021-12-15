@@ -9,20 +9,38 @@ class ViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        defaultValues()
-        Conductor.shared.actions { [weak self] text in
-            self?.fruitsInStock.append(.init(name: text, isChecked: false))
-            self?.tableView.reloadData()
-        } back: {
-            self.dismiss(animated: true, completion: nil)
-        }
+        initializeFruitsInStock()
     }
 
-    private func defaultValues() {
-        fruitsInStock.append(.init(name: "りんご", isChecked: false))
-        fruitsInStock.append(.init(name: "みかん", isChecked: true))
-        fruitsInStock.append(.init(name: "バナナ", isChecked: false))
-        fruitsInStock.append(.init(name: "パイナップル", isChecked: true))
+    private func initializeFruitsInStock() {
+        fruitsInStock = [
+            .init(name: "りんご", isChecked: false),
+            .init(name: "みかん", isChecked: true),
+            .init(name: "バナナ", isChecked: false),
+            .init(name: "パイナップル", isChecked: true)
+        ]
+    }
+
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        guard let identifier = segue.identifier else { return }
+
+        switch identifier {
+        case "Homesegue":
+            guard let navigationController = segue.destination as? UINavigationController,
+                  let addFruitVC = navigationController.topViewController as? AddFruitViewController else { return }
+            addFruitVC.setup(
+                didTapSave: { [weak self] text in
+                    self?.fruitsInStock.append(.init(name: text, isChecked: false))
+                    self?.tableView.reloadData()
+                    self?.dismiss(animated: true, completion: nil)
+                },
+                didTapCancel: { [weak self] in
+                    self?.dismiss(animated: true, completion: nil)
+                }
+            )
+        default:
+            break
+        }
     }
 }
 
@@ -49,19 +67,6 @@ class FruitCell: UITableViewCell {
 
     func configure(item: CheckItem) {
         fruitsNameLabel.text = item.name
-        checkImgaeView.image = item.isChecked ? UIImage(named: "checkMark") : nil
-    }
-}
-
-class Conductor {
-    static let shared = Conductor()
-    struct Event {
-        static var save: (String) -> Void = {_ in }
-        static var back: () -> Void = {}
-    }
-    private init() {}
-    public func actions(save: @escaping(String) -> Void, back: @escaping() -> Void) {
-        Event.save = save
-        Event.back = back
+        checkImgaeView.image = item.isChecked ? UIImage(named: "checkmark") : nil
     }
 }
