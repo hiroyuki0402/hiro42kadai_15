@@ -7,14 +7,22 @@
 
 import UIKit
 class AddFruitViewController: UIViewController {
-   @IBOutlet private weak var enterFruitTextField: UITextField!
+    @IBOutlet private weak var enterFruitTextField: UITextField!
 
-   @IBAction private func executeSaveButton(_ sender: Any) {
-       guard let text = enterFruitTextField.text, !text.isEmpty else { return }
-       Conductor.Event.save(text)
-       Conductor.Event.back()
-   }
-   @IBAction private func executeCancelButton(_ sender: Any) {
-       Conductor.Event.back()
-   }
+    private var didTapSave: (String) -> Void = { _ in }
+    private var didTapCancel: () -> Void = {}
+
+    func setup(didTapSave: @escaping (String) -> Void, didTapCancel: @escaping () -> Void) {
+        self.didTapSave = didTapSave
+        self.didTapCancel = didTapCancel
+    }
+
+    @IBAction private func executeSaveButton(_ sender: Any) {
+        guard let text = enterFruitTextField.text, !text.isEmpty else { return }
+        didTapSave(text)
+    }
+
+    @IBAction private func executeCancelButton(_ sender: Any) {
+        didTapCancel()
+    }
 }
